@@ -20,7 +20,7 @@ def distAcross(comp,dr,interval,len_a,n = 50):
         return segDistAcross(dr, interval, len_a)   
     else:
         return vertDistAcross(dr, interval, len_a)
-    
+
 def vertDistAcross(vdr,interval, len_a,n=50):
     """
     returns a list of points defining the distance function from the vertex
@@ -50,6 +50,7 @@ def vertDistAcross(vdr,interval, len_a,n=50):
         d = vertDistance(vdr, k, len_a)
         r.append((k,d))
     return r
+
 
 def segDistAcross(sdr,interval,len_a,n=50):
     """
@@ -112,15 +113,21 @@ def componentDistance (dr,k,len_a):
         answer = vertDistance(dr,k,len_a)
     return answer
 
-def component_label(comp):
+def component_label(comp,verbose = False):
     """for debugging"""
     if comp == None:
         return "None"
     else:
-        if comp[0] == True:
-            return"s{}".format(comp[1])
+        if verbose:
+            if comp[0] == True:
+                return f"seg{comp[1]}-{comp[1] + 1}"
+            else:
+                return f"vrt{comp[1]}"
         else:
-            return "v{}".format(comp[1])
+            if comp[0] == True:
+                return"s{}".format(comp[1])
+            else:
+                return "v{}".format(comp[1])
 
 def compValid(n_vert,comp):
     """
@@ -198,7 +205,6 @@ def effectiveInterval(A,B,a,bcomp):
         vint = vertEffectiveInterval(A, B, a, bcomp[1])
         return vint
 
-
 def segDistance(dr,k,len_a):
     """
     Computes the distance from dr to k on a segment a.
@@ -251,7 +257,7 @@ def segDistRep (A,B,a,b):
             are parallel
         sin_theta : float
             sine of angle between lines through segments, 
-            but negative if cosine is negative
+            but negative if tangent is negative
             or q-distance between lines if they are parallel.
         k_max : float
             k-value of right hand vertex
@@ -280,7 +286,7 @@ def segDistRep (A,B,a,b):
         # Find the angle created by the two lines
         s_rad = g.angle([A[a],A[a+1]],[B[b],B[b+1]])
         # Calculate the sine of the angle
-        s = m.sin(s_rad)
+        s = abs(m.sin(s_rad))
         # determine lean of b with respect to a
         # use endpoint furthest from a to determine
 
@@ -334,13 +340,14 @@ def withinUnitInterval(a,b):
     or (-inf,-inf) if the input interval does not overlap the unit interval
 
     """
-    kmin = min(min(a,b),1)
-    kmax = max(max(a,b),0)
+    kmin = max(min(a,b),0)
+    kmax = min(max(a,b),1)
     if kmin==1 or kmax==0:
         return (float('-inf'),float('-inf'))
     
     else:
         return (kmin,kmax)
+
 
 def segEffectiveInterval(A,B,a,b, tolerance=0.000001):
     """
@@ -380,7 +387,6 @@ def segEffectiveInterval(A,B,a,b, tolerance=0.000001):
     k2 = g.kvalue(prjout2,a1,a2)
     if abs(k1-k2) <= tolerance:
         # segment is perpendicular, so 
-        
         if (g.area([a1,a2,b1]) > 0) == (g.area([a1,a2,b2]) > 0):
             # IF THEY DON'T CROSS effective interval is nothing
             return [float('-inf'),float('-inf')]
@@ -394,7 +400,8 @@ def segEffectiveInterval(A,B,a,b, tolerance=0.000001):
         # return them in sequence, bound to range [0,1]
         return withinUnitInterval(k1,k2)
 
-def switchPoint (dr1, dr2, tol = 0.00000001):
+
+def switchPoint (dr1, dr2, tol = 0.00000001, verbose = False):
     """
     Determines point along a where the nearest point on B switches from the 
     component represented by dr1 to the component represented by dr2.
@@ -458,6 +465,7 @@ def vertDistance(dr, k, len_a):
     d = len_a * d
     return abs(d)
 
+
 def vertDistRep(A,B,a,b):
     """
     Constructs the Distance Representation for vertex b with respect to segment a.
@@ -480,7 +488,7 @@ def vertDistRep(A,B,a,b):
         k : float 
             k-value of the location of the perpendicular projection of b onto the line through a.
         q : float 
-            q-distance from b to the line through a, negative if b is left of a
+            q-distance from b to the line through a, negative if b is right of a
             
     @author: MT and TJ
     """
@@ -503,6 +511,7 @@ def vertDistRep(A,B,a,b):
     FinalList.append(q)
     FinalList = tuple(FinalList) 
     return FinalList
+
 
 def vertEffectiveInterval(A,B,a,b,tolerance=0.000001):
     """
@@ -664,6 +673,7 @@ def vertEffectiveInterval(A,B,a,b,tolerance=0.000001):
                 else:
                     return (float('-inf'),float('-inf'))
 
+
 def segSegSwitchPoint(dr1, dr2, tol = 0.00000001):
     """
     Determines the k-value where segment A crosses from 
@@ -735,6 +745,7 @@ def segSegSwitchPoint(dr1, dr2, tol = 0.00000001):
     # return values in ascending order, for consistency
     return sorted(k)
 
+
 def vertSegSwitchPoint(vdr, sdr, from_vertex = True, tol = 0.00000001):
     """
     Determines the k-value of the location along segment a that is equidistant 
@@ -760,6 +771,7 @@ def vertSegSwitchPoint(vdr, sdr, from_vertex = True, tol = 0.00000001):
     
     @author: Folaitan & Ljansen; directionality introduced by BK
     """
+    verbose = False
     # get distance representation values into more readable variables
     k_vert = vdr[1]
     q_vert = vdr[2]
@@ -788,20 +800,28 @@ def vertSegSwitchPoint(vdr, sdr, from_vertex = True, tol = 0.00000001):
             return [vertSegPoint]
     elif k_seg == None: 
         # b segment is parallel to a
+        if verbose:
+            print("Segment is parallel to a...!!!!!!!")
         q_seg = sin_theta # distance representation value is q not sin_theta
         a = 1
         b = -2*k_vert
         c = k_vert**2 + q_vert**2 - q_seg**2
     else: # normal case
+        if verbose:
+            print("Normal case!!!!!!!")
         a = (sin_theta**2)-1
         b = (2*k_vert)-((2*k_seg)*(sin_theta**2))
         c = ((k_seg**2)*(sin_theta**2))-(k_vert**2)-(q_vert**2)
     inside_root = (b**2)-(4*a*c)
     # catch floating point precision issues:
     if -tol < inside_root < tol:
+        if verbose:
+            print("Setting inside routes to zero due to floating point precision...")
         inside_root = 0                
     # check number of roots
     if inside_root < 0:
+        if verbose:
+            print("Inside route is less than zero!!!!!!!")
         # if inside_root is less than zero, quadratic formula has no 
         # solution and there is no switch point to return
         return []
@@ -811,17 +831,30 @@ def vertSegSwitchPoint(vdr, sdr, from_vertex = True, tol = 0.00000001):
         try:
             point_on_line = True
             if k_seg == None: 
+                if verbose:
+                    print("no k_seg!!!!!!!")
                 # segment is parallel to a
                 # just check if segment and vertex are on same side of a
                 if (q_vert > 0) != (q_seg > 0):
                     point_on_line = False
-            elif (k_seg > k_vert) == ((q_vert > 0) == (sin_theta > 0)):
-                # the above returns True if 0 or 2 of the terms are true
-                # in which case segment B is tangent to parabolic Voronoi edge
+            ### NEW METHOD
+            elif abs(q_vert - (k_vert - k_seg) * (sin_theta / (1-sin_theta ** 2) ** 0.5)) > 2 * tol:
                 point_on_line = False
+            ### OLD METHOD
+            # elif (k_seg > k_vert) == ((q_vert > 0) == (sin_theta > 0)):
+            #     print("really complicated triple equality!!!!!!!")
+            #     print(f"k_seg: {k_seg}")
+            #     # the above returns True if 0 or 2 of the terms are true
+            #     # in which case segment B is tangent to parabolic Voronoi edge
+            #     point_on_line = False
+            ### END OLD METHOD
+                
+                
             if point_on_line:
                 # vertex is on segment; need to check which is right and
                 # make sure we get the vertex
+                if verbose:
+                    print("point is online!!!!")
                 if from_vertex and (ks_max - tol > k_vert):
                     return [-b/(2*a)]
                 elif (from_vertex == False) and (k_vert >= ks_max - tol):
@@ -830,6 +863,8 @@ def vertSegSwitchPoint(vdr, sdr, from_vertex = True, tol = 0.00000001):
                     return []
             else:
                 # no need to switch
+                if verbose:
+                    print("point is not on line!!!!!!!")
                 return []
 
         except Exception as e:
@@ -849,6 +884,7 @@ def vertSegSwitchPoint(vdr, sdr, from_vertex = True, tol = 0.00000001):
         else:
             return [min(solution_1, solution_2)]
 
+
             
 def vertVertSwitchPoint (dr1,dr2):
     """
@@ -864,9 +900,8 @@ def vertVertSwitchPoint (dr1,dr2):
     
     # MT and LJ; directionality introduced by BK
     """
-    # return crossing only if v2 is to the right of v1
-#     #check to see if absolute values of k for dr1 and dr2 are not equal
-    if abs(dr2[1]) > abs(dr1[1]):
+    # return crossing only if v2 is to the right of v1 (i.e. has higher k-valuep)
+    if dr2[1] > dr1[1]:
         #calculates k value for switch point
         k = [((dr2[2]**2 - dr1[2]**2) + (dr2[1]**2 - dr1[1]**2)) / (2 * (dr2[1]-dr1[1]))] 
     else:
@@ -906,6 +941,7 @@ def seg_idx(B):
     r = index.Index(gen_func())
     return r
 
+
 def candidateComponents(A,B,a,nl1,nl2,d1,d2,B_seg_idx,brute_force = False):
     """
     Identifies all components of B that could be the target of the Hausdorff 
@@ -931,11 +967,7 @@ def candidateComponents(A,B,a,nl1,nl2,d1,d2,B_seg_idx,brute_force = False):
     [(bool, int)]
         A list of candidate components on B.
     """
-
-    # **********
-    # function hu.candidateComponents can be adjusted to use R-tree
-    # to reduce number of components to check
-    # **********
+    # brute_force = True
 
     if brute_force:
         # OLD
@@ -968,8 +1000,14 @@ def candidateComponents(A,B,a,nl1,nl2,d1,d2,B_seg_idx,brute_force = False):
         if anchor == (None,None):
             # if perp bisector is parallel to seg a, anchor is w
             # on line between near locations
-            anchor = g.intersection(nl1, nl2, A[a], A[a+1])
+            # first check if near locations are the same
+            if nl1 == nl2:
+                # project point to linegeometry utilities
+                anchor = g.project_pt_to_line(nl1,A[a],A[a+1])
+            else:
+                anchor = g.intersection(nl1, nl2, A[a], A[a+1])
         # third radius is from anchor
+
         rc = g.distance(anchor,nl1)
         
         # get bounds of search
@@ -977,6 +1015,12 @@ def candidateComponents(A,B,a,nl1,nl2,d1,d2,B_seg_idx,brute_force = False):
         xmax = max(A[a][0] + r1, A[a+1][0] + r2, anchor[0] + rc)
         ymin = min(A[a][1] - r1, A[a+1][1] - r2, anchor[1] - rc)
         ymax = max(A[a][1] + r1, A[a+1][1] + r2, anchor[1] + rc)
+
+        # new method: use anchor only
+        xmin = anchor[0] - rc
+        xmax = anchor[0] + rc
+        ymin = anchor[1] - rc
+        ymax = anchor[1] + rc
 
         # search for candidate components using index        
         square = (xmin,ymin,xmax,ymax)       
@@ -989,7 +1033,6 @@ def candidateComponents(A,B,a,nl1,nl2,d1,d2,B_seg_idx,brute_force = False):
             result.append((True,s))
         for v in verts:
             result.append((False,v))
-        
         return result
 
 
@@ -1056,10 +1099,8 @@ def nearSegment(A,B,a, B_seg_idx):
                 min_d = d
                 min_index = b    
         return min_index
-    
 
     
-
 def nearComponent(A,B,a,b):
     """
     Among segment b, vertex b and vertex b+1, determines which component is nearest to vertex a.
@@ -1103,6 +1144,7 @@ def nearComponent(A,B,a,b):
     else: # return segment b
         d = g.distance(A[a],prj)
         return ((True,b),prj,d)        
+
 
 def nearLoc(srcloc,trgline,trgcomp):
     """

@@ -61,6 +61,8 @@ import integrals
 
 def polyline_hausdorff(A,B):
     """
+    ***deprecated, should use Hausdorff_average_distance function***
+    
     Computes the Hausdorff distance between two polylines, i.e. the maximum
     distance from any point on either polyline to the nearest point on the
     other polyline.
@@ -121,9 +123,15 @@ def polyline_hausdorff(A,B):
     return h,srcloc,srcline,srccomp,trglocs,trgcomps
 
 
-def directional_polyline_avg_dist(A,B,brute_force = False):
+# from dataclasses import dataclass, field
+
+# @dataclass
+# class HausdorfResults:
+#     H: float = field(description='')
+    
+def hausdorff_average_distance(A,B,verbose = False,brute_force = False):
     """
-    Computes the one-way average distance from A to B
+    Computes the one-way Hausdorff and average distance from A to B
 
     Parameters
     ----------
@@ -133,8 +141,17 @@ def directional_polyline_avg_dist(A,B,brute_force = False):
         The coordinates of the other polyline.
     Returns
     ----------
+    H : float
+        The unidirectional Hausdorff distance between the polylines.
     avgD : float
-        The unidirectional avg distance between the polylines.
+        The unidirectional average distance between the polylines.
+    dist_func : list of (pos,d,comp)
+        pos : float
+            position along A; int portion is vertex, decimal is k-value
+        d : float
+            distance to nearest point on B
+        comp : (bool, int)
+            nearest component on B for following section of distance function
     """
 
     # initialize component and distance lists
@@ -143,21 +160,21 @@ def directional_polyline_avg_dist(A,B,brute_force = False):
     vertDist = []
     # create index of B segments
     B_seg_idx = hu.seg_idx(B)
-
+    
     # get distance from each vertex on A to its nearest component on B
     for a in range(len(A)):
-        # **********
-        # function hu.nearSegment can be adjusted to use R-tree
-        # **********
         b = hu.nearSegment(A, B, a, B_seg_idx)
         comp, nearloc, d = hu.nearComponent(A, B, a, b)
         vNearComp.append(comp)
         vNearLoc.append(nearloc)
         vertDist.append(d)
 
-    # get distance from segments on A to nearest components on B
+    # traverse segments on A tracking nearest components on B
     tot_area = 0
     tot_len = 0
+    d_Hausdorff = 0
+    # h_from_seg = -1
+    dist_func = []
     for a in range(len(A)-1):
         comp_list = hu.candidateComponents(
             A,B,a,
@@ -165,12 +182,31 @@ def directional_polyline_avg_dist(A,B,brute_force = False):
             vertDist[a],vertDist[a+1],
             B_seg_idx,brute_force
             )
-        near_comps = segment_traversal(A, B, a, vNearComp[a],vertDist[a],vNearComp[a+1],vertDist[a+1], comp_list)
+        near_comps = segment_traversal(A, B, a, vNearComp[a],vertDist[a],vNearComp[a+1],vertDist[a+1], comp_list,verbose)
+        dist_func += [(a+k,d,comp) for d,k,comp,rep in near_comps]
+        # update maximum (Hausdorff) distance
+        seg_max = max(x[0] for x in near_comps)
+        if seg_max > d_Hausdorff:
+            d_Hausdorff = seg_max
+            # h_from_seg = a
+        # increment total length and total area for average distance computation
         L = g.distance(A[a], A[a+1])
         tot_len += L
         area = segment_dist_integral(near_comps, L)
         tot_area += area
-    return tot_area/tot_len
+
+    # handle final vertex
+    a = len(A) - 1
+    d = vertDist[a]
+    k = 0
+    comp = vNearComp[a]
+    dist_func.append((a+k,d,comp))
+    if d > d_Hausdorff:
+        d_Hausdorff = d
+
+    d_avg = tot_area / tot_len
+    
+    return d_Hausdorff, d_avg, dist_func
 
 
 def near_components(A,B):
@@ -224,6 +260,8 @@ def near_components(A,B):
 
 def directional_polyline_hausdorff(A,B,brute_force = False):
     """
+    ***deprecated, we shouldn't need this anymore***
+    
     Computes the one-way Hausdorff distance from A to B, i.e. the maximum
     distance from any point on A to the nearest point on B.
 
@@ -562,9 +600,11 @@ def _updateComponent(A,B,a,comps, eis, drs, prev_id, prev_ei, verbose=False, tol
                         print("      no crossings found")
                 for k in ks:
                     if verbose:
-                        if (k < 0) or (k > 1):
-                            print("      crossing k is not between 0-1")
-                    if 0 <= k <= 1: # crossing k is between 0-1
+                        if (k < 0 - tol) or (k > 1):
+                            print(f"      crossing k ({k}) is not between 0-1")
+                        else:
+                            print(f"crossing k ({k}) seems okay...")
+                    if 0 - tol <= k <= 1: # crossing k is between 0-1
                         if verbose:
                             if (k < prev_ei[0]-tol) or (k > prev_ei[1]+tol):
                                 print("      cross point in effective interval of previous component")

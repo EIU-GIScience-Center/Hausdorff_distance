@@ -469,7 +469,7 @@ def displacementArea(simp_table,n):
     
     return disp_areas[index_of_last_added_point]
 
-def simplificationTable(pts, p_func=__placement_AP_EAmin, m_func=__sideshift_area, do_topo_check = False, other_pt_lists = None):
+def simplificationTable(pts, p_func=__placement_AP_EAmin, m_func=__sideshift_area, do_topo_check = False, other_pt_lists = None, report_interval = 10000):
     """Collapses segments and builds simplification tree.
     from which simplified versions of line can be constructed.
     Args:
@@ -496,7 +496,6 @@ def simplificationTable(pts, p_func=__placement_AP_EAmin, m_func=__sideshift_are
     E = len(pts)-1
     maxerror=0
     collapsed=0
-    report_interval=2000
     while len(pl)>0:
         error,A,B,C,D,pE, overlap_endpt = pl.pop(0)
         if current[A] and current[B] and current[C] and current[D]:

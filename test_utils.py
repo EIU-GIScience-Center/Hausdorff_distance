@@ -85,6 +85,11 @@ def case(casenum):
     B = [(5,3),(2,3),(2,6),(8,0),(10,0),(12,0),(14,0),(14,8),(12,8),(12,6),(10,10),(16,10),(16,3),(16,0),(18,0),(20,2),(26,2),(25,7),(20,4)]
     cases.append((A,B))
     
+    # 11 Hangouët revised - journal article version
+    A = [(0, 0), (5, 0)] # plotting code assumes a horizontal line beginning at (0,0)
+    B = [(2.4, -1), (2.5, -0.4), (4.5, -0.9), (6.4, 0.8), (4, 0.5), (2, 2.3), (0.5, 0.5)]
+    cases.append((A,B))
+    
     # * cleanup *
     if casenum == -1:
         return len(cases)

@@ -12,6 +12,8 @@
 import math as __m
 from decimal import Decimal
 
+
+
 def angle(v1,v2):
     """
     Computes the angle from vector v1 to vector v2, measured in radians. 
@@ -102,6 +104,38 @@ def area(pts,absolute=False):
     else:
         return A
 
+
+def densify(poly,spacing):
+    """
+    Inserts vertices into each segment at maximum spacing distance apart
+
+    Parameters
+    ----------
+    poly : list of (x,y) tuples
+        Coordinates of polyline.
+    spacing : float
+        Maximum spacing between vertices.
+
+    Returns
+    -------
+    Densified polyline.
+
+    """
+    r = [poly[0]]
+    for v in poly[1:]:
+        prev_v = r[-1]
+        d = distance(prev_v,v)
+        nv = __m.ceil(d/spacing) - 1
+        dx = (v[0] - prev_v[0]) / (nv + 1)
+        dy = (v[1] - prev_v[1]) / (nv + 1)
+        for i in range(nv):
+            x = prev_v[0] + dx * (i + 1)
+            y = prev_v[1] + dy * (i + 1)
+            r.append((x,y))
+        r.append(v)
+    return r
+
+#
 def distance(a,b):
     """ 
     Computes the distance between two points.
@@ -118,7 +152,9 @@ def distance(a,b):
         The Euclidean distance between the two input points.
         
     """
-    return  __m.sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
+    return  ((b[0]-a[0])**2 + (b[1]-a[1])**2)**0.5
+    # return  __m.sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
+
 
 def project_pt_to_line(p,a,b):
     """
@@ -164,6 +200,7 @@ def project_pt_to_line(p,a,b):
     # return as an (x,y) tuple
     return (outX,outY)
 
+
 def distance_to_line(p,a,b, include_sign = False):
     """
     Computes the perpendicular distance from a point to an infinite line.
@@ -200,6 +237,7 @@ def distance_to_line(p,a,b, include_sign = False):
         # area is 1/2 base x height so height is 2*area/base
         return 2*trianglearea/line_length
 
+
 def is_monotonic(a,b,c):
     """
     Determines if the three input numbers are in sequence, either low-to-high
@@ -226,6 +264,7 @@ def is_monotonic(a,b,c):
         return True
     else:
         return False    
+
     
 def distance_to_segment(p,a,b):
     """
@@ -320,6 +359,7 @@ def intersection(A,B,C,D,infinite=True,ultra_precise=False):
         yp = float(yp)
     return (xp,yp)
 
+
 def kvalue(p,a,b):
     """ 
     Determines the k-value of the point p on the line segment a-b. The k-value is the normalized
@@ -347,6 +387,7 @@ def kvalue(p,a,b):
         return (p[1]-a[1])/(b[1]-a[1])
     else: # use x-coordinates
         return (p[0]-a[0])/(b[0]-a[0])
+
     
 def location(C,s,k):
     """
@@ -368,6 +409,7 @@ def location(C,s,k):
     x = C[s][0] + k*(C[s+1][0]-C[s][0])
     y = C[s][1] + k*(C[s+1][1]-C[s][1])
     return (x,y)    
+
     
 def project_out(a1,a2,b1,b2):
     # returns k-value of perpendicular extension from b1 to a
@@ -422,6 +464,7 @@ def project_out(a1,a2,b1,b2):
             else:
                 k = IK + dk
             return k
+
         
 def rotate_pts(pts, origin, deg_cw):
     theta = __m.radians(deg_cw)
@@ -437,6 +480,7 @@ def rotate_pts(pts, origin, deg_cw):
         y = p[0] * sin_theta + p[1] * cos_theta
         rotated_pts.append((x,y))
     return rotated_pts
+
 
 def rotate_horizontal(pts, pts2 = None):
     """

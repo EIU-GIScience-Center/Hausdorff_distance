@@ -1,0 +1,5 @@
+County Outlines: Manhattan (NOAA medium shoreline data)
+Lakes: Great salt lake
+		Lake Shelbyville (USGS NHD)
+Country Borders: Bangladesh and Pakistan (US State Department)
+Rivers:  

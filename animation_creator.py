@@ -23,8 +23,8 @@ import os
 import numpy as np
 
 #set folder and base file path
-cases = [(0,1), (4,1), (6,0), (8,0), (9,0)]
-base_image_folder = r'C:\CaGIS Board Dropbox\cantaloupe bob\Research\Projects\line difference metrics\Hausdorff\animation\hausdroff_animation\outputs'
+cases = [(11,0)] # [(0,1), (4,1), (6,0), (8,0), (9,0)]
+base_image_folder = r'C:\Users\xsyao\CaGIS Board Dropbox\cantaloupe bob\Barry\Research\Projects\polyline difference metrics\Hausdorff\animation\hausdroff_animation\outputs'
 
 # define animation parameters
 dpi = 200 # default image size is 6" x 4"
@@ -36,7 +36,7 @@ if not os.path.isdir(base_image_folder):
     os.mkdir(base_image_folder)
 
 #loop over all cases
-for case_num, seg_num in cases[3:4]:
+for case_num, seg_num in cases:
     # setup case number folder and file information
     print("case number "+str(case_num))        
     case_num_folder = os.path.join(base_image_folder, "case_"+str(case_num))
@@ -59,7 +59,9 @@ for case_num, seg_num in cases[3:4]:
                                 k=plot_num/steps,
                                 k_buffer = k_buffer,
                                 imagefile = imagefile,
-                                dpi = dpi)
+                                dpi = dpi,
+                                k_use_hausdorff=False,
+                                stop_distance_function_at_k=True)
     for i in range(steps+1):
         print("generating frame {} of {}".format(i,steps))
         generate_plot(i,steps)
