@@ -15,7 +15,7 @@ The following figure illustrates the difference between the SciPy, Shapely and P
 ![Hausdorff comparison](https://user-images.githubusercontent.com/13248690/121942432-15951b00-cd16-11eb-9d6c-ea787f154f66.png)
 
 # How do I use the code?
-Basic usage is illustrated in the file, `illustration.py`.
+Basic usage is illustrated in the file, `usage.py`.
 
 # How does it work? 
 The code follows the general algorithm described in:
