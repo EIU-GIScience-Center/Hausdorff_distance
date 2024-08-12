@@ -24,17 +24,17 @@ The code follows the general algorithm described in:
 
 The algorithm has been updated in several ways to ensure robustness and improve computational efficiency. Details on these improvements are currently being prepared for publication.
 
-# Current Status (updated Apr 2024)
-This is still a working process. The code is functional but has not been cleaned, organized and documented so usage is not recommended except for research purposes.
+# Current Status (updated Aug: 2024)
+This is still a work in process. The code is fully functional and has been tested against a variety of test cases. The code still requires further cleaning to remove legacy functions bot main code is in a mature state. This code comes without any warranty, and is recommended for research purposes only.
 
 ## Robustness
 The code has been tested on several cases including coincident, overlapping and perpendicular line segments with random transformations to catch problems involving floating point precision arithmetic. It appears to be robust but further testing is warranted for production-level usage. 
-C
+
 ## Computational Efficiency
-Computational efficiency has been improved with a "three-circle-filter" and is usually subquadratic but approaches cubic running time in the very unlikely worst case scenario. 
+Computational efficiency has been improved with a "three-circle-filter" and is usually subquadratic but approaches theoretical cubic running time in the very unlikely worst case scenario. 
 
 ## Code Testing
-Test functions are included for all subsidiary functions as well as the main function. To perform additional tests, add coordinates for pairs of polyines you wish to test to the `case` function in `test_utils.py` and then run `test_polyline_hausdroff.py`.
+Test functions need to be modified to reflect refactoring of main code.
 
 # Who created this?
 This code is being developed by Dr. Barry Kronenfeld at Eastern Illinois University with support from the USGS. However this repository has not been approved or endorsed by EIU or the USGS. 
@@ -44,7 +44,7 @@ Much of the code for the Hausdorff distance calculation was developed by student
 * Luke Jansen
 * Tanner Jones
 * Farouk Olaitan
-* Megshi Thakur
+* Megshi Thakurtimes
 
 # Is this free to use?
 Yes, it is licensed with the open source MIT License. If you find this useful, acknowledgement would be appreciated.
